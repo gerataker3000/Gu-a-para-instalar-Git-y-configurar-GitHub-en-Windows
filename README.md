@@ -227,3 +227,5 @@ Sube el proyecto:
 ```powershell
 git push -u origin main
 ```
+
+Si acado te habre una pantalla de login, simplemente es para asociar y autorizar los cambios
