@@ -229,3 +229,183 @@ git push -u origin main
 ```
 
 Si acado te habre una pantalla de login, simplemente es para asociar y autorizar los cambios
+
+---
+
+# 11. Configurar varias llaves SSH cuando tienes más de una cuenta
+
+Este paso solo aplica cuando tienes más de una llave SSH o más de una cuenta de GitHub en la misma computadora.
+
+Por ejemplo, puede pasar que tengas:
+
+- Una cuenta personal.
+- Una cuenta de clases.
+- Una cuenta de trabajo.
+- Varias llaves SSH dentro de la carpeta .ssh.
+
+El problema es que si usas directamente:
+
+git@github.com:USUARIO/REPOSITORIO.git
+
+Git puede tomar una llave que no corresponde a esa cuenta.
+Por eso a veces aparece un error como:
+
+**Permission denied publickey**
+
+O también:
+
+**Repository not found**
+
+Aunque la llave sí exista.
+
+Para evitar eso, se usa un archivo llamado config dentro de la carpeta .ssh.
+
+---
+
+## 11.1 Revisar las llaves que existen
+
+Primero se revisan las llaves que ya tienes:
+
+ls -al ~/.ssh
+
+Puedes ver archivos como:
+
+* id_ed25519
+* id_ed25519.pub
+* id_rsa
+* id_rsa.pub
+* clases
+* clases.pub
+* trabajo
+* trabajo.pub
+
+Los archivos que terminan en .pub son las llaves públicas.
+
+Los archivos que no terminan en .pub son las llaves privadas.
+
+Para configurar SSH se usan las llaves privadas, o sea las que no tienen .pub.
+
+---
+
+## 11.2 Crear o abrir el archivo config
+
+El archivo debe llamarse exactamente:
+
+config
+
+No debe llamarse:
+
+config.txt
+
+Para abrirlo puedes usar:
+```powershell
+notepad ~/.ssh/config
+```
+Si no existe, se va a crear.
+
+---
+
+## 11.3 Agregar una configuración por cada cuenta
+
+Dentro del archivo config puedes agregar una configuración por cada cuenta o por cada llave.
+
+Ejemplo:
+
+### Cuenta personal
+
+Host github-personal
+HostName github.com
+User git
+IdentityFile ~/.ssh/id_ed25519
+IdentitiesOnly yes
+
+### Cuenta de clases
+
+Host github-clases
+HostName github.com
+User git
+IdentityFile ~/.ssh/clases
+IdentitiesOnly yes
+
+### Cuenta de trabajo
+
+Host github-trabajo
+HostName github.com
+User git
+IdentityFile ~/.ssh/trabajo
+IdentitiesOnly yes
+
+Aquí lo importante es el nombre que va después de Host.
+
+Por ejemplo:
+
+- github-personal
+- github-clases
+- github-trabajo
+
+Ese nombre se va a usar después en el remote del repositorio.
+
+---
+
+## 11.4 Probar cada configuración
+
+Después de guardar el archivo config, se puede probar cada cuenta.
+
+Para probar la cuenta personal:
+```powershell
+ssh -T git@github-personal
+```
+Para probar la cuenta de clases:
+```powershell
+ssh -T git@github-clases
+```
+Para probar la cuenta de trabajo:
+```powershell
+ssh -T git@github-trabajo
+```
+Si está bien configurado, GitHub debe responder algo parecido a:
+
+Hi usuario! You've successfully authenticated, but GitHub does not provide shell access.
+
+Eso significa que la llave sí está conectando con GitHub.
+
+---
+
+## 11.5 Cambiar el remote del proyecto
+
+Cuando se usan varias llaves, no conviene dejar el remote así:
+
+git@github.com:USUARIO/REPOSITORIO.git
+
+Porque puede tomar la llave incorrecta.
+
+Se debe cambiar por el Host que se configuró.
+
+Ejemplo para la cuenta de clases:
+```powershell
+git remote set-url origin git@github-clases:USUARIO/REPOSITORIO.git
+```
+Ejemplo para la cuenta personal:
+```powershell
+git remote set-url origin git@github-personal:USUARIO/REPOSITORIO.git
+```
+Ejemplo para la cuenta de trabajo:
+```powershell
+git remote set-url origin git@github-trabajo:USUARIO/REPOSITORIO.git
+```
+---
+
+## 11.6 Revisar que el remote quedó correcto
+
+Para revisar el remote actual:
+```powershell
+git remote -v
+```
+Debe verse algo parecido a:
+```powershell
+origin git@github-clases:USUARIO/REPOSITORIO.git fetch
+
+origin git@github-clases:USUARIO/REPOSITORIO.git push
+```
+---
+
